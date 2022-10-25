@@ -7,6 +7,11 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type
 include_once '../../config/Database.php';
 include_once '../../models/Post.php';
 
+require '../../vendor/autoload.php';
+
+Predis\Autoloader::register();
+$client = new Predis\Client();
+
 $database = new Database();
 
 $db = $database->connect();
@@ -22,6 +27,8 @@ $post->author = $data->author;
 $post->category_id = $data->category_id;
 
 if ($post->update_post()) {
+    if ($client->get('Post-'. $post->id)) 
+        $client->del('Post-'. $post->id);
     echo json_encode(
         array('message' => 'Post Updated')
     );
